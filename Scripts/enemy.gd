@@ -5,6 +5,7 @@ class_name Enemy extends Area2D
 @export var points = 100
 
 signal killed
+signal hit
 
 func _physics_process(delta):
 	global_position.y += speed * delta
@@ -17,6 +18,8 @@ func take_damage(amount):
 	if(hp <= 0):
 		die()
 		killed.emit(points)
+	else:
+		hit.emit()
 
 func _on_body_entered(body: Node2D):
 	if body is Player:
