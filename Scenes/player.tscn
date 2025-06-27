@@ -8,10 +8,12 @@ collision_mask = 12
 script = ExtResource("1_cvnsp")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(0.8, 0.8)
 texture = ExtResource("1_v0iea")
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+scale = Vector2(0.8, 0.8)
 polygon = PackedVector2Array(0, 0, -12, -12, -35, 2, -40, 0, -45, -7, -50, -6, -46, 24, -43, 24, -41, 20, -38, 22, -14, 27, -8, 37, 8, 37, 13, 28, 36, 24, 41, 21, 43, 25, 47, 25, 50, -5, 45, -7, 40, -1, 36, 1, 13, -12, 9, -38, -9, -38, -12, -12)
 
 [node name="Aim" type="Marker2D" parent="."]
-position = Vector2(0, -41)
+position = Vector2(0, -35)
