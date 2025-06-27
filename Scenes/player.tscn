@@ -1,9 +1,10 @@
 [gd_scene load_steps=3 format=3 uid="uid://cp8l4kfwgubhc"]
 
-[ext_resource type="Script" uid="uid://poi3m17onth5" path="res://Scenes/player.gd" id="1_cvnsp"]
+[ext_resource type="Script" uid="uid://poi3m17onth5" path="res://Scripts/player.gd" id="1_cvnsp"]
 [ext_resource type="Texture2D" uid="uid://edbxal1qxt5r" path="res://Assets/PNG/playerShip1_blue.png" id="1_v0iea"]
 
 [node name="Player" type="CharacterBody2D" groups=["player"]]
+collision_mask = 12
 script = ExtResource("1_cvnsp")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
@@ -11,3 +12,6 @@ texture = ExtResource("1_v0iea")
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
 polygon = PackedVector2Array(0, 0, -12, -12, -35, 2, -40, 0, -45, -7, -50, -6, -46, 24, -43, 24, -41, 20, -38, 22, -14, 27, -8, 37, 8, 37, 13, 28, 36, 24, 41, 21, 43, 25, 47, 25, 50, -5, 45, -7, 40, -1, 36, 1, 13, -12, 9, -38, -9, -38, -12, -12)
+
+[node name="Aim" type="Marker2D" parent="."]
+position = Vector2(0, -41)
