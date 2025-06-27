@@ -11,12 +11,12 @@ func _physics_process(delta):
 
 func die():
 	queue_free()
-	killed.emit(points)
 	
 func take_damage(amount):
 	hp -= amount
 	if(hp <= 0):
 		die()
+		killed.emit(points)
 
 func _on_body_entered(body: Node2D):
 	if body is Player:

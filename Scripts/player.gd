@@ -6,6 +6,7 @@ class_name Player extends CharacterBody2D
 @onready var aim = $Aim
 
 signal laser_shot(lascer_scene, location)
+signal killed
 
 var lascer_scene = preload("res://Scenes/laser.tscn")
 var shoot_cd := false
@@ -31,3 +32,4 @@ func shoot():
 	
 func die():
 	queue_free()
+	killed.emit()
