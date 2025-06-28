@@ -12,7 +12,7 @@ func _physics_process(delta):
 
 func die():
 	queue_free()
-	
+
 func take_damage(amount):
 	hp -= amount
 	if(hp <= 0):

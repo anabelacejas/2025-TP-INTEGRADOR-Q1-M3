@@ -1,0 +1,23 @@
+[gd_scene load_steps=3 format=3 uid="uid://dfbw2us40lscs"]
+
+[ext_resource type="Script" uid="uid://drbqae11q6jt" path="res://small_enemy.gd" id="1_brhb0"]
+[ext_resource type="Texture2D" uid="uid://c58dyki7c0pm2" path="res://Assets/PNG/Enemies/enemyBlue3.png" id="2_1vrmh"]
+
+[node name="small_enemy" type="Area2D"]
+collision_layer = 4
+collision_mask = 3
+script = ExtResource("1_brhb0")
+movement_pattern = "sine"
+speed = 180
+points = 50
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("2_1vrmh")
+
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(13, -17, 25, -2, 19, 21, 13, 20, 16, 14, 6, 11, 5, 16, -5, 16, -6, 11, -16, 14, -14, 19, -19, 21, -19, 21, -26, -1, -13, -18, -8, -18, -4, -21, 3, -21, 8, -18)
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
