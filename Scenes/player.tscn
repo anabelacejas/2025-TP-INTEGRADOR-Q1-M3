@@ -1,19 +1,58 @@
-[gd_scene load_steps=3 format=3 uid="uid://cp8l4kfwgubhc"]
+[gd_scene load_steps=7 format=3 uid="uid://cp8l4kfwgubhc"]
 
 [ext_resource type="Script" uid="uid://poi3m17onth5" path="res://Scripts/player.gd" id="1_cvnsp"]
-[ext_resource type="Texture2D" uid="uid://edbxal1qxt5r" path="res://Assets/PNG/playerShip1_blue.png" id="1_v0iea"]
+[ext_resource type="Texture2D" uid="uid://c2ktttwhj4el0" path="res://Assets/PNG/player_animated_ship.png" id="3_6t5aa"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vgqql"]
+atlas = ExtResource("3_6t5aa")
+region = Rect2(96, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fkybt"]
+atlas = ExtResource("3_6t5aa")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_x3wgy"]
+atlas = ExtResource("3_6t5aa")
+region = Rect2(144, 0, 48, 48)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_3smsa"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vgqql")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fkybt")
+}],
+"loop": true,
+"name": &"left",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_x3wgy")
+}],
+"loop": true,
+"name": &"right",
+"speed": 5.0
+}]
 
 [node name="Player" type="CharacterBody2D" groups=["player"]]
 collision_mask = 12
 script = ExtResource("1_cvnsp")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
-scale = Vector2(0.8, 0.8)
-texture = ExtResource("1_v0iea")
-
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
 scale = Vector2(0.8, 0.8)
-polygon = PackedVector2Array(0, 0, -12, -12, -35, 2, -40, 0, -45, -7, -50, -6, -46, 24, -43, 24, -41, 20, -38, 22, -14, 27, -8, 37, 8, 37, 13, 28, 36, 24, 41, 21, 43, 25, 47, 25, 50, -5, 45, -7, 40, -1, 36, 1, 13, -12, 9, -38, -9, -38, -12, -12)
+polygon = PackedVector2Array(-20, -5, -20, 1.25, -23.75, 5, -36.25, 5, -47.5, 17.5, -47.5, 35, -46.25, 37.5, -41.25, 37.5, -38.75, 40, -21.25, 40, -18.75, 48.75, -11.25, 40, -7.5, 47.5, 7.5, 47.5, 11.25, 40, 20, 48.75, 21.25, 38.75, 40, 38.75, 47.5, 36.25, 47.5, 17.5, 36.25, 6.25, 22.5, 6.25, 22.5, 2.5, 20, -6.25, 12.5, -6.25, 10, -11.25, 10, -30, 0, -50, -10, -30, -11.25, -11.25, -12.5, -5)
 
 [node name="Aim" type="Marker2D" parent="."]
 position = Vector2(0, -35)
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+scale = Vector2(1.7, 1.7)
+sprite_frames = SubResource("SpriteFrames_3smsa")

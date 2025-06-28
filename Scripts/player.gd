@@ -4,6 +4,7 @@ class_name Player extends CharacterBody2D
 @export var firing_rate = 0.25
 
 @onready var aim = $Aim
+@onready var anim_sprite = $AnimatedSprite2D
 
 signal laser_shot(lascer_scene, location)
 signal killed
@@ -23,6 +24,13 @@ func _physics_process(_delta):
 	var direction = Vector2(Input.get_axis("move_left","move_right"),Input.get_axis("move_up","move_down"))
 	velocity = direction * speed
 	move_and_slide()
+	
+	if direction.x > 0:
+			anim_sprite.play("left")
+	elif direction.x < 0:
+			anim_sprite.play("right")
+	else:
+			anim_sprite.play("default")
 	
 	var margin = Vector2(26,26)
 	global_position = global_position.clamp(margin,get_viewport_rect().size - margin)
