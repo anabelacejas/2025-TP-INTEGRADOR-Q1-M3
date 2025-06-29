@@ -29,7 +29,7 @@ gravity = Vector3(0, 0, 0)
 
 [node name="Game" type="Node2D"]
 script = ExtResource("1_qxrlw")
-enemy_scenes = Array[PackedScene]([ExtResource("4_3dryh"), ExtResource("5_wowpa"), ExtResource("4_1phco"), ExtResource("5_nb51f"), ExtResource("6_nnt18")])
+enemy_scenes = Array[PackedScene]([ExtResource("4_3dryh"), ExtResource("5_wowpa"), ExtResource("4_1phco"), ExtResource("6_nnt18"), ExtResource("5_nb51f")])
 
 [node name="SFX" type="Node" parent="."]
 

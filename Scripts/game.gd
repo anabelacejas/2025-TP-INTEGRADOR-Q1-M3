@@ -19,14 +19,78 @@ extends Node2D
 @onready var explosion_sound = $SFX/ExplodeSound
 @onready var lose_sound = $SFX/LoseSound
 
+# THREADING SYSTEM
 var save_thread := Thread.new()
+var spawn_calculator_thread := Thread.new()
+var difficulty_thread := Thread.new()
+var background_thread := Thread.new()
 
+# THREAD MUTEXES
+var spawn_mutex := Mutex.new()
+var difficulty_mutex := Mutex.new()
+var background_mutex := Mutex.new()
+
+# THREAD-SAFE DATA
+var thread_running = true
+var spawn_data = {
+	"spawn_rate": 2.0,
+	"enemy_weights": [1.0, 0.0, 0.0, 0.0, 0.0],  # Probability weights for each enemy type
+	"current_difficulty": 0
+}
+var difficulty_data = {
+	"time_elapsed": 0.0,
+	"current_phase": 0,
+	"scroll_speed": 100
+}
+
+# GAME STATE
 var high_score = 0
 var score := 0:
 	set(value):
 		score = value
 		hud.score = value
+var game_start_time: float
 var scroll_speed = 100
+
+# DIFFICULTY CONFIGURATION
+var difficulty_phases = [
+	{
+		"time_threshold": 0,     # Phase 0: Start
+		"enemy_weights": [1.0, 0.0, 0.0, 0.0, 0.0],
+		"spawn_rate": 1.8,
+		"scroll_speed": 100
+	},
+	{
+		"time_threshold": 15,    # Phase 1: 15 seconds
+		"enemy_weights": [0.7, 0.3, 0.0, 0.0, 0.0],
+		"spawn_rate": 1.5,
+		"scroll_speed": 120
+	},
+	{	
+		"time_threshold": 30,    # Phase 2: 30 seconds
+		"enemy_weights": [0.4, 0.3, 0.3, 0.0, 0.0],
+		"spawn_rate": 1.2,
+		"scroll_speed": 140
+	},
+	{
+		"time_threshold": 50,   # Phase 3: 50 seconds
+		"enemy_weights": [0.2, 0.3, 0.3, 0.2, 0.0],
+		"spawn_rate": 1.0,
+		"scroll_speed": 160
+	},
+	{
+		"time_threshold": 60,   # Phase 4: 60 seconds
+		"enemy_weights": [0.2, 0.2, 0.3, 0.2, 0.1],
+		"spawn_rate": 0.8,
+		"scroll_speed": 180
+	},
+	{
+		"time_threshold": 80,   # Phase 5: 80+ seconds - Maximum difficulty
+		"enemy_weights": [0.1, 0.2, 0.2, 0.2, 0.3],
+		"spawn_rate": 0.6,
+		"scroll_speed": 200
+	}
+]
 
 func _ready():
 	var save_file = FileAccess.open("res://Saves/save.data",FileAccess.READ)
@@ -35,15 +99,99 @@ func _ready():
 	else:
 		high_score = 0
 		save_thread.start(_save_game_thread.bind(high_score))
+	
 	score = 0
+	game_start_time = Time.get_ticks_msec() / 1000.0
 	assert(player!=null)
 	
 	# Add player to group so enemies can find it
 	player.add_to_group("player")  # NEW
-	
 	player.global_position = player_spawn_pos.global_position
 	player.laser_shot.connect(_on_player_laser_shot)
 	player.killed.connect(_on_player_killed)
+	
+	# Start background threads
+	_start_background_threads()
+
+func _start_background_threads():
+	"""Start all background computation threads"""
+	thread_running = true
+	
+	# Spawn calculation thread - calculates optimal spawn timing
+	spawn_calculator_thread.start(_spawn_calculator_thread)
+	
+	# Difficulty progression thread - manages game difficulty over time
+	difficulty_thread.start(_difficulty_progression_thread)
+	
+	# Background processing thread - handles scroll and other background tasks
+	background_thread.start(_background_processing_thread)
+
+func _spawn_calculator_thread():
+	"""Background thread for calculating spawn parameters"""
+	while thread_running:
+		spawn_mutex.lock()
+		
+		# Calculate dynamic spawn rate based on score and time
+		var time_factor = min(difficulty_data.time_elapsed / 300.0, 1.0)  # Cap at 5 minutes
+		var score_factor = min(score / 10000.0, 1.0)  # Cap at 10k score
+		var combined_factor = (time_factor + score_factor) / 2.0
+		
+		# Update spawn rate (faster spawning as difficulty increases)
+		spawn_data.spawn_rate = lerp(2.0, 0.5, combined_factor)
+		
+		# Update enemy type probabilities based on current difficulty phase
+		if difficulty_data.current_phase < difficulty_phases.size():
+			var phase = difficulty_phases[difficulty_data.current_phase]
+			spawn_data.enemy_weights = phase.enemy_weights.duplicate()
+		
+		spawn_mutex.unlock()
+		
+		# Update every 100ms for responsive difficulty scaling
+		OS.delay_msec(100)
+
+func _difficulty_progression_thread():
+	"""Background thread for managing difficulty progression"""
+	while thread_running:
+		difficulty_mutex.lock()
+		
+		# Update elapsed time
+		difficulty_data.time_elapsed = (Time.get_ticks_msec() / 1000.0) - game_start_time
+		
+		# Check for phase transitions
+		var new_phase = 0
+		for i in range(difficulty_phases.size() - 1, -1, -1):
+			if difficulty_data.time_elapsed >= difficulty_phases[i].time_threshold:
+				new_phase = i
+				break
+		
+		# Update phase if changed
+		if new_phase != difficulty_data.current_phase:
+			difficulty_data.current_phase = new_phase
+			var phase = difficulty_phases[new_phase]
+			difficulty_data.scroll_speed = phase.scroll_speed
+			print("Difficulty Phase ", new_phase, " activated! Time: ", difficulty_data.time_elapsed, "s")
+		
+		difficulty_mutex.unlock()
+		
+		# Update every 500ms for phase checking
+		OS.delay_msec(500)
+
+func _background_processing_thread():
+	"""Background thread for scroll speed and other background calculations"""
+	while thread_running:
+		background_mutex.lock()
+		
+		# Calculate dynamic scroll speed adjustments
+		# Could add screen shake calculations, particle effects, etc.
+		var target_scroll_speed = float(difficulty_data.scroll_speed)
+		
+		# Smooth scroll speed transitions
+		scroll_speed = lerp(float(scroll_speed), target_scroll_speed, 0.02)
+		
+		background_mutex.unlock()
+		
+		# Update every 50ms for smooth transitions
+		OS.delay_msec(50)
 
 func _save_game_thread(score_to_save):
 	var file := FileAccess.open("user://save.data", FileAccess.WRITE)
@@ -54,18 +202,62 @@ func _save_game_thread(score_to_save):
 
 func _process(delta):
 	if Input.is_action_just_pressed("Quit"):
+		_cleanup_threads()
 		get_tree().quit()
 	elif Input.is_action_just_pressed("Reset"):
+		_cleanup_threads()
 		get_tree().reload_current_scene()
-	# Timer for Spawn Rate
-	if(timer.wait_time>0.5):
-		timer.wait_time -= delta*0.005
-	elif timer.wait_time < 0.5:
-		timer.wait_time = 0.5
-	# Background Movement
-	background.scroll_offset.y += delta*scroll_speed
+	
+	# Update timer with calculated spawn rate
+	spawn_mutex.lock()
+	timer.wait_time = spawn_data.spawn_rate
+	spawn_mutex.unlock()
+	
+	# Update background scroll
+	background_mutex.lock()
+	var current_scroll_speed = scroll_speed
+	background_mutex.unlock()
+	
+	background.scroll_offset.y += delta * current_scroll_speed
 	if background.scroll_offset.y >= 960:
 		background.scroll_offset.y = 0
+
+func _cleanup_threads():
+	"""Safely stop and cleanup all threads"""
+	thread_running = false
+	
+	# Wait for threads to finish
+	if spawn_calculator_thread.is_started():
+		spawn_calculator_thread.wait_to_finish()
+	if difficulty_thread.is_started():
+		difficulty_thread.wait_to_finish()
+	if background_thread.is_started():
+		background_thread.wait_to_finish()
+	if save_thread.is_started():
+		save_thread.wait_to_finish()
+
+func _select_enemy_type() -> int:
+	"""Select enemy type based on weighted probabilities"""
+	spawn_mutex.lock()
+	var weights = spawn_data.enemy_weights.duplicate()
+	spawn_mutex.unlock()
+	
+	var total_weight = 0.0
+	for weight in weights:
+		total_weight += weight
+	
+	if total_weight <= 0:
+		return 0  # Default to first enemy type
+	
+	var random_value = randf() * total_weight
+	var cumulative_weight = 0.0
+	
+	for i in range(weights.size()):
+		cumulative_weight += weights[i]
+		if random_value <= cumulative_weight:
+			return i
+	
+	return weights.size() - 1  # Fallback to last enemy type
 
 func _on_player_laser_shot(lascer_scene, location):
 	var laser = lascer_scene.instantiate()
@@ -85,25 +277,38 @@ func _on_enemy_laser_shot(laser_scene, location):
 		laser_sound.play()
 
 func _on_enemy_spawn_timer_timeout():
-	var enemy = enemy_scenes.pick_random().instantiate()
-	enemy.global_position = Vector2(randf_range(50,500),-50)
+	# Select enemy type based on current difficulty
+	var enemy_type_index = _select_enemy_type()
+	
+	# Ensure we don't go out of bounds
+	if enemy_type_index >= enemy_scenes.size():
+		enemy_type_index = enemy_scenes.size() - 1
+	
+	var enemy = enemy_scenes[enemy_type_index].instantiate()
+	enemy.global_position = Vector2(randf_range(50, 500), -50)
 	enemy.killed.connect(_on_enemy_killed)
 	enemy.hit.connect(_on_enemy_hit)
 	
-	# NEW - Connect laser_shot signal for shooting enemies
+	# Connect signals if available
 	if enemy.has_signal("laser_shot"):
 		enemy.laser_shot.connect(_on_enemy_laser_shot)
-	
-	# NEW - Connect small_enemies_spawned signal for big enemies
 	if enemy.has_signal("small_enemies_spawned"):
 		enemy.small_enemies_spawned.connect(_on_small_enemies_spawned)
 	
 	enemy_container.add_child(enemy)
+	
+	# Debug info (remove in production)
+	difficulty_mutex.lock()
+	var phase = difficulty_data.current_phase
+	var time_elapsed = difficulty_data.time_elapsed
+	difficulty_mutex.unlock()
+	
+	print("Spawned enemy type ", enemy_type_index, " | Phase: ", phase, " | Time: ", int(time_elapsed), "s")
 
 func _on_enemy_killed(points):
 	explosion_sound.play()
 	score += points
-	
+
 func _on_enemy_hit():
 	hit_sound.play()
 
@@ -134,11 +339,21 @@ func _on_player_killed():
 	explosion_sound.play()
 	game_over.set_score(score)
 	game_over.set_high_score(high_score)
+	
 	if(score > high_score):
 		high_score = score
 		game_over.set_high_score(score)
+	
+	# Save in background thread
+	if save_thread.is_started():
+		save_thread.wait_to_finish()
 	save_thread.start(_save_game_thread.bind(high_score))
+	
 	await get_tree().create_timer(0.5).timeout
 	lose_sound.play()
 	await get_tree().create_timer(1).timeout
 	game_over.visible = true
+
+func _exit_tree():
+	"""Cleanup when exiting"""
+	_cleanup_threads()
