@@ -1,6 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://b4i47m4g11fug"]
+[gd_scene load_steps=5 format=3 uid="uid://b4i47m4g11fug"]
 
 [ext_resource type="Script" uid="uid://bmwxrj5f2vpxt" path="res://Scripts/hud.gd" id="1_e0onf"]
+[ext_resource type="FontFile" uid="uid://cdr6vltgcjyhj" path="res://Assets/Bonus/ConnectionII.otf" id="2_bjfho"]
+[ext_resource type="FontFile" uid="uid://dnnf52x8mkeom" path="res://Assets/Bonus/kenvector_future.ttf" id="3_bjfho"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_3gfia"]
 font_size = 40
@@ -16,10 +18,36 @@ script = ExtResource("1_e0onf")
 
 [node name="Score" type="Label" parent="."]
 layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_bottom = 23.0
-grow_horizontal = 2
-text = "Score: 9999"
+offset_right = 450.0
+offset_bottom = 120.0
+scale = Vector2(1.2, 1.2)
+theme_override_fonts/font = ExtResource("2_bjfho")
+theme_override_font_sizes/font_size = 64
+text = "0"
 label_settings = SubResource("LabelSettings_3gfia")
+horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="PhaseMessage" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -125.0
+offset_top = -55.0
+offset_right = 125.0
+offset_bottom = 55.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("3_bjfho")
+theme_override_font_sizes/font_size = 40
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PhaseTimer" type="Timer" parent="."]
+wait_time = 3.0
+one_shot = true
+
+[connection signal="timeout" from="PhaseTimer" to="." method="_on_phase_timer_timeout"]

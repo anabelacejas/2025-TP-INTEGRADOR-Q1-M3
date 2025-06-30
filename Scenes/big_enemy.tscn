@@ -1,8 +1,8 @@
 [gd_scene load_steps=5 format=3 uid="uid://bxho7hhgdg74e"]
 
-[ext_resource type="Script" path="res://big_enemy.gd" id="1_vdags"]
-[ext_resource type="Texture2D" uid="uid://c75aoicyk56e3" path="res://Assets/PNG/Enemies/enemyBlue4.png" id="2_m8xkl"]
+[ext_resource type="Script" uid="uid://cckkfh1utd4kk" path="res://big_enemy.gd" id="1_vdags"]
 [ext_resource type="PackedScene" uid="uid://dfbw2us40lscs" path="res://Scenes/small_enemy.tscn" id="2_u0ks7"]
+[ext_resource type="Texture2D" uid="uid://bv4yjdeujiatn" path="res://Assets/PNG/Enemies/CrabShip.png" id="3_m8xkl"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_u0ks7"]
 radius = 50.0
@@ -13,12 +13,12 @@ collision_layer = 4
 collision_mask = 3
 script = ExtResource("1_vdags")
 small_enemy_scene = ExtResource("2_u0ks7")
-speed = 100
+speed = 80
 hp = 3
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-scale = Vector2(1.2, 1.2)
-texture = ExtResource("2_m8xkl")
+scale = Vector2(2, 2)
+texture = ExtResource("3_m8xkl")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CapsuleShape2D_u0ks7")
