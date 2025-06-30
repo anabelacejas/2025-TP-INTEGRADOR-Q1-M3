@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=3 uid="uid://oruby4md8jvo"]
 
-[ext_resource type="Script" uid="uid://dd4aw6lsif78a" path="res://Scenes/game_over.gd" id="1_8fo1c"]
+[ext_resource type="Script" uid="uid://dd4aw6lsif78a" path="res://Scripts/game_over.gd" id="1_8fo1c"]
 [ext_resource type="FontFile" uid="uid://dnnf52x8mkeom" path="res://Assets/Bonus/kenvector_future.ttf" id="1_ojehl"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_i2yjh"]

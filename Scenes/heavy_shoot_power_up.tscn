@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://dn4n4ruis28sm"]
 
-[ext_resource type="Script" uid="uid://bl6hu8g053mid" path="res://Scenes/heavy_shoot_power_up.gd" id="1_8jos7"]
+[ext_resource type="Script" uid="uid://bl6hu8g053mid" path="res://Scripts/heavy_shoot_power_up.gd" id="1_8jos7"]
 [ext_resource type="Texture2D" uid="uid://c86a0t2rkblh4" path="res://Assets/PNG/Power-ups/powerupRed_bolt.png" id="1_mej8m"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_8jos7"]
