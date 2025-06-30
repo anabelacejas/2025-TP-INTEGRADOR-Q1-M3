@@ -56,3 +56,4 @@ position = Vector2(0, -35)
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 scale = Vector2(1.7, 1.7)
 sprite_frames = SubResource("SpriteFrames_3smsa")
+animation = &"left"

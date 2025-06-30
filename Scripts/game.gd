@@ -1,3 +1,4 @@
+# This is game.gd
 extends Node2D
 
 @export var enemy_scenes: Array[PackedScene] = []
@@ -5,7 +6,7 @@ extends Node2D
 @onready var player_spawn_pos: Marker2D = $PlayerSpawnPos
 @onready var player: CharacterBody2D = $Player
 @onready var laser_container: Node2D = $LaserContainer
-@onready var enemy_laser_container: Node2D = $EnemyLaserContainer  # NEW - Add this node to your scene
+@onready var enemy_laser_container: Node2D = $EnemyLaserContainer
 @onready var enemy_container: Node2D = $EnemyContainer
 @onready var timer: Timer = $EnemySpawnTimer
 @onready var hud: Control = $UILayer/HUD
@@ -14,7 +15,7 @@ extends Node2D
 
 # SOUNDS
 @onready var laser_sound = $SFX/LaserSound
-@onready var enemy_laser_sound = $SFX/EnemyLaserSound  # NEW - Optional, add if you want different sound
+@onready var enemy_laser_sound = $SFX/EnemyLaserSound
 @onready var hit_sound = $SFX/HitSound
 @onready var explosion_sound = $SFX/ExplodeSound
 @onready var lose_sound = $SFX/LoseSound
@@ -33,7 +34,7 @@ var background_mutex := Mutex.new()
 # THREAD-SAFE DATA
 var thread_running = true
 var spawn_data = {
-	"spawn_rate": 2.0,
+	"spawn_rate": 1.7,
 	"enemy_weights": [1.0, 0.0, 0.0, 0.0, 0.0],  # Probability weights for each enemy type
 	"current_difficulty": 0
 }
@@ -55,40 +56,46 @@ var scroll_speed = 100
 # DIFFICULTY CONFIGURATION
 var difficulty_phases = [
 	{
-		"time_threshold": 0,     # Phase 0: Start
+		"time_threshold": 0,
 		"enemy_weights": [1.0, 0.0, 0.0, 0.0, 0.0],
-		"spawn_rate": 1.8,
-		"scroll_speed": 100
+		"spawn_rate": 1.7,
+		"scroll_speed": 100,
+		"message": "\nSPACE MISSION\nBEGINS!"
 	},
 	{
-		"time_threshold": 15,    # Phase 1: 15 seconds
-		"enemy_weights": [0.7, 0.3, 0.0, 0.0, 0.0],
-		"spawn_rate": 1.5,
-		"scroll_speed": 120
+		"time_threshold": 15,
+		"enemy_weights": [0.5, 0.5, 0.0, 0.0, 0.0],
+		"spawn_rate": 1.4,
+		"scroll_speed": 120,
+		"message": "\nSPEED UNITS\nINBOUND!"
 	},
-	{	
-		"time_threshold": 30,    # Phase 2: 30 seconds
-		"enemy_weights": [0.4, 0.3, 0.3, 0.0, 0.0],
+	{
+		"time_threshold": 30,
+		"enemy_weights": [0.3, 0.3, 0.4, 0.0, 0.0],
 		"spawn_rate": 1.2,
-		"scroll_speed": 140
+		"scroll_speed": 140,
+		"message": "\nARMED ENEMIES\nENGAGING!"
 	},
 	{
-		"time_threshold": 50,   # Phase 3: 50 seconds
-		"enemy_weights": [0.2, 0.3, 0.3, 0.2, 0.0],
+		"time_threshold": 50,
+		"enemy_weights": [0.1, 0.2, 0.3, 0.4, 0.0],
 		"spawn_rate": 1.0,
-		"scroll_speed": 160
+		"scroll_speed": 160,
+		"message": "\nSWARMS OF\nDODGERS\nAPPROACHING!"
 	},
 	{
-		"time_threshold": 60,   # Phase 4: 60 seconds
-		"enemy_weights": [0.2, 0.2, 0.3, 0.2, 0.1],
+		"time_threshold": 60,
+		"enemy_weights": [0.1, 0.1, 0.2, 0.2, 0.4],
 		"spawn_rate": 0.8,
-		"scroll_speed": 180
+		"scroll_speed": 180,
+		"message": "\nTITAN CLASS\nDETECTED!"
 	},
 	{
-		"time_threshold": 80,   # Phase 5: 80+ seconds - Maximum difficulty
+		"time_threshold": 80,
 		"enemy_weights": [0.1, 0.2, 0.2, 0.2, 0.3],
 		"spawn_rate": 0.6,
-		"scroll_speed": 200
+		"scroll_speed": 200,
+		"message": "\nMAXIMUM THREAT\nLEVEL!"
 	}
 ]
 
@@ -105,13 +112,17 @@ func _ready():
 	assert(player!=null)
 	
 	# Add player to group so enemies can find it
-	player.add_to_group("player")  # NEW
+	player.add_to_group("player")
 	player.global_position = player_spawn_pos.global_position
 	player.laser_shot.connect(_on_player_laser_shot)
 	player.killed.connect(_on_player_killed)
 	
 	# Start background threads
 	_start_background_threads()
+	
+	# Show initial phase message after a short delay
+	await get_tree().create_timer(0.5).timeout
+	_show_phase_transition(0, difficulty_phases[0].get("message", ""))
 
 func _start_background_threads():
 	"""Start all background computation threads"""
@@ -137,7 +148,7 @@ func _spawn_calculator_thread():
 		var combined_factor = (time_factor + score_factor) / 2.0
 		
 		# Update spawn rate (faster spawning as difficulty increases)
-		spawn_data.spawn_rate = lerp(2.0, 0.5, combined_factor)
+		spawn_data.spawn_rate = lerp(1.7, 0.6, combined_factor)
 		
 		# Update enemy type probabilities based on current difficulty phase
 		if difficulty_data.current_phase < difficulty_phases.size():
@@ -166,15 +177,24 @@ func _difficulty_progression_thread():
 		
 		# Update phase if changed
 		if new_phase != difficulty_data.current_phase:
+			var old_phase = difficulty_data.current_phase
 			difficulty_data.current_phase = new_phase
 			var phase = difficulty_phases[new_phase]
 			difficulty_data.scroll_speed = phase.scroll_speed
+			
+			# Show phase message on main thread
+			call_deferred("_show_phase_transition", new_phase, phase.get("message", ""))
+			
 			print("Difficulty Phase ", new_phase, " activated! Time: ", difficulty_data.time_elapsed, "s")
 		
 		difficulty_mutex.unlock()
 		
 		# Update every 500ms for phase checking
 		OS.delay_msec(500)
+
+func _show_phase_transition(phase_number: int, message: String):
+	"""Called on main thread to show phase transition message"""
+	hud.show_phase_message(phase_number, message)
 
 func _background_processing_thread():
 	"""Background thread for scroll speed and other background calculations"""
@@ -265,7 +285,6 @@ func _on_player_laser_shot(lascer_scene, location):
 	laser_container.add_child(laser)
 	laser_sound.play()
 
-# NEW FUNCTION - Handle enemy laser shots
 func _on_enemy_laser_shot(laser_scene, location):
 	var laser = laser_scene.instantiate()
 	laser.global_position = location
@@ -312,7 +331,6 @@ func _on_enemy_killed(points):
 func _on_enemy_hit():
 	hit_sound.play()
 
-# NEW - Handle spawning of small enemies from big enemies
 func _on_small_enemies_spawned(enemies_data):
 	for enemy_data in enemies_data:
 		var small_enemy = enemy_data.scene.instantiate()

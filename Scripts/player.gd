@@ -26,9 +26,9 @@ func _physics_process(_delta):
 	move_and_slide()
 	
 	if direction.x > 0:
-			anim_sprite.play("left")
-	elif direction.x < 0:
 			anim_sprite.play("right")
+	elif direction.x < 0:
+			anim_sprite.play("left")
 	else:
 			anim_sprite.play("default")
 	
