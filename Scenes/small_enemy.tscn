@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://dfbw2us40lscs"]
 
-[ext_resource type="Script" uid="uid://drbqae11q6jt" path="res://small_enemy.gd" id="1_brhb0"]
+[ext_resource type="Script" uid="uid://drbqae11q6jt" path="res://Scripts/small_enemy.gd" id="1_brhb0"]
 [ext_resource type="Texture2D" uid="uid://ckhngfy51m3je" path="res://Assets/PNG/Enemies/fighter1.png" id="2_brhb0"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_1vrmh"]

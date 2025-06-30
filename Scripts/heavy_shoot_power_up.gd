@@ -13,5 +13,5 @@ func _on_area_entered(area: Area2D):
 
 func _on_body_entered(body: Node2D):
 	if body is Player:
-		body.lascer_scene = preload("res://Scenes/heavy_laser.tscn")
+		body.activate_heavy_laser()
 		queue_free()

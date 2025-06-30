@@ -22,6 +22,7 @@ extends Node2D
 @onready var hit_sound = $SFX/HitSound
 @onready var explosion_sound = $SFX/ExplodeSound
 @onready var lose_sound = $SFX/LoseSound
+@onready var background_music = $BGM/BackgroundMusic
 
 # THREADING SYSTEM
 var save_thread := Thread.new()
@@ -40,7 +41,7 @@ var spawn_data = {
 	"spawn_rate": 1.7,
 	"enemy_weights": [1.0, 0.0, 0.0, 0.0, 0.0],  # Probability weights for each enemy type
 	"current_difficulty": 0,
-	"power_up_spawn_rate": 5,
+	"power_up_spawn_rate": 10,
 	"power_up_weights": [1.0]
 }
 var difficulty_data = {
@@ -64,7 +65,7 @@ var difficulty_phases = [
 		"time_threshold": 0,
 		"enemy_weights": [1.0, 0.0, 0.0, 0.0, 0.0],
 		"spawn_rate": 1.7,
-		"power_up_spawn_rate": 5, 
+		"power_up_spawn_rate": 10, 
 		"scroll_speed": 100,
 		"message": "\nSPACE MISSION\nBEGINS!"
 	},
@@ -72,7 +73,7 @@ var difficulty_phases = [
 		"time_threshold": 15,    # Phase 1: 15 seconds
 		"enemy_weights": [0.7, 0.3, 0.0, 0.0, 0.0],
 		"spawn_rate": 1.4,
-		"power_up_spawn_rate": 8,
+		"power_up_spawn_rate": 5,
 		"scroll_speed": 120,
 		"message": "\nSPEED UNITS\nINBOUND!"
 	},
@@ -80,7 +81,7 @@ var difficulty_phases = [
 		"time_threshold": 30,
 		"enemy_weights": [0.3, 0.3, 0.4, 0.0, 0.0],
 		"spawn_rate": 1.2,
-		"power_up_spawn_rate": 10,
+		"power_up_spawn_rate": 8,
 		"scroll_speed": 140,
 		"message": "\nARMED ENEMIES\nENGAGING!"
 	},
@@ -88,7 +89,7 @@ var difficulty_phases = [
 		"time_threshold": 50,
 		"enemy_weights": [0.1, 0.2, 0.3, 0.4, 0.0],
 		"spawn_rate": 1.0,
-		"power_up_spawn_rate": 15,
+		"power_up_spawn_rate": 11,
 		"scroll_speed": 160,
 		"message": "\nSWARMS OF\nDODGERS\nAPPROACHING!"
 	},
@@ -96,7 +97,7 @@ var difficulty_phases = [
 		"time_threshold": 60,
 		"enemy_weights": [0.1, 0.1, 0.2, 0.2, 0.4],
 		"spawn_rate": 0.8,
-		"power_up_spawn_rate": 18,
+		"power_up_spawn_rate": 13,
 		"scroll_speed": 180,
 		"message": "\nTITAN CLASS\nDETECTED!"
 	},
@@ -104,7 +105,7 @@ var difficulty_phases = [
 		"time_threshold": 80,
 		"enemy_weights": [0.1, 0.2, 0.2, 0.2, 0.3],
 		"spawn_rate": 0.6,
-		"power_up_spawn_rate": 20,
+		"power_up_spawn_rate": 15,
 		"scroll_speed": 200,
 		"message": "\nMAXIMUM THREAT\nLEVEL!"
 	}
@@ -134,6 +135,10 @@ func _ready():
 	# Show initial phase message after a short delay
 	await get_tree().create_timer(0.5).timeout
 	_show_phase_transition(0, difficulty_phases[0].get("message", ""))
+	
+	# Configure background music
+	if not background_music.playing:
+		background_music.play()
 
 func _start_background_threads():
 	"""Start all background computation threads"""
