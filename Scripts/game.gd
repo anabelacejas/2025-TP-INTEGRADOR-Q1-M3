@@ -1,13 +1,16 @@
 extends Node2D
 
 @export var enemy_scenes: Array[PackedScene] = []
+@export var power_up_scenes: Array[PackedScene] = []
 
 @onready var player_spawn_pos: Marker2D = $PlayerSpawnPos
 @onready var player: CharacterBody2D = $Player
 @onready var laser_container: Node2D = $LaserContainer
 @onready var enemy_laser_container: Node2D = $EnemyLaserContainer  # NEW - Add this node to your scene
 @onready var enemy_container: Node2D = $EnemyContainer
+@onready var power_up_container: Node2D = $PowerUpContainer
 @onready var timer: Timer = $EnemySpawnTimer
+@onready var timer_power_up: Timer = $PowerUpSpawnTimer
 @onready var hud: Control = $UILayer/HUD
 @onready var game_over: Control = $UILayer/GameOver
 @onready var background: ParallaxBackground = $ParallaxBackground
@@ -35,7 +38,9 @@ var thread_running = true
 var spawn_data = {
 	"spawn_rate": 2.0,
 	"enemy_weights": [1.0, 0.0, 0.0, 0.0, 0.0],  # Probability weights for each enemy type
-	"current_difficulty": 0
+	"current_difficulty": 0,
+	"power_up_spawn_rate": 5,
+	"power_up_weights": [1.0]
 }
 var difficulty_data = {
 	"time_elapsed": 0.0,
@@ -58,36 +63,42 @@ var difficulty_phases = [
 		"time_threshold": 0,     # Phase 0: Start
 		"enemy_weights": [1.0, 0.0, 0.0, 0.0, 0.0],
 		"spawn_rate": 1.8,
+		"power_up_spawn_rate": 5, 
 		"scroll_speed": 100
 	},
 	{
 		"time_threshold": 15,    # Phase 1: 15 seconds
 		"enemy_weights": [0.7, 0.3, 0.0, 0.0, 0.0],
 		"spawn_rate": 1.5,
+		"power_up_spawn_rate": 8,
 		"scroll_speed": 120
 	},
 	{	
 		"time_threshold": 30,    # Phase 2: 30 seconds
 		"enemy_weights": [0.4, 0.3, 0.3, 0.0, 0.0],
 		"spawn_rate": 1.2,
+		"power_up_spawn_rate": 10,
 		"scroll_speed": 140
 	},
 	{
 		"time_threshold": 50,   # Phase 3: 50 seconds
 		"enemy_weights": [0.2, 0.3, 0.3, 0.2, 0.0],
 		"spawn_rate": 1.0,
+		"power_up_spawn_rate": 15,
 		"scroll_speed": 160
 	},
 	{
 		"time_threshold": 60,   # Phase 4: 60 seconds
 		"enemy_weights": [0.2, 0.2, 0.3, 0.2, 0.1],
 		"spawn_rate": 0.8,
+		"power_up_spawn_rate": 18,
 		"scroll_speed": 180
 	},
 	{
 		"time_threshold": 80,   # Phase 5: 80+ seconds - Maximum difficulty
 		"enemy_weights": [0.1, 0.2, 0.2, 0.2, 0.3],
 		"spawn_rate": 0.6,
+		"power_up_spawn_rate": 20,
 		"scroll_speed": 200
 	}
 ]
@@ -211,6 +222,7 @@ func _process(delta):
 	# Update timer with calculated spawn rate
 	spawn_mutex.lock()
 	timer.wait_time = spawn_data.spawn_rate
+	timer_power_up.wait_time = spawn_data.power_up_spawn_rate
 	spawn_mutex.unlock()
 	
 	# Update background scroll
@@ -236,18 +248,13 @@ func _cleanup_threads():
 	if save_thread.is_started():
 		save_thread.wait_to_finish()
 
-func _select_enemy_type() -> int:
-	"""Select enemy type based on weighted probabilities"""
-	spawn_mutex.lock()
-	var weights = spawn_data.enemy_weights.duplicate()
-	spawn_mutex.unlock()
-	
+func _select_type(weights) -> int:
 	var total_weight = 0.0
 	for weight in weights:
 		total_weight += weight
 	
 	if total_weight <= 0:
-		return 0  # Default to first enemy type
+		return 0  # Default to first power_up type
 	
 	var random_value = randf() * total_weight
 	var cumulative_weight = 0.0
@@ -257,7 +264,23 @@ func _select_enemy_type() -> int:
 		if random_value <= cumulative_weight:
 			return i
 	
-	return weights.size() - 1  # Fallback to last enemy type
+	return weights.size() - 1 
+
+func _select_power_up_type() -> int:
+	"""Select power up type based on weighted probabilities"""
+	spawn_mutex.lock()
+	var weights = spawn_data.power_up_weights.duplicate()
+	spawn_mutex.unlock()
+	
+	return _select_type(weights)
+
+func _select_enemy_type() -> int:
+	"""Select enemy type based on weighted probabilities"""
+	spawn_mutex.lock()
+	var weights = spawn_data.enemy_weights.duplicate()
+	spawn_mutex.unlock()
+	
+	return _select_type(weights)
 
 func _on_player_laser_shot(lascer_scene, location):
 	var laser = lascer_scene.instantiate()
@@ -334,6 +357,27 @@ func _on_small_enemies_spawned(enemies_data):
 		
 		# Add slight delay between spawns for visual effect
 		await get_tree().create_timer(0.1).timeout
+
+func _on_power_up_spawn_timer_timeout():
+	# Select power up type based on current difficulty
+	var power_up_index = _select_power_up_type()
+	
+	# Ensure we don't go out of bounds
+	if power_up_index >= power_up_scenes.size():
+		power_up_index = power_up_scenes.size() - 1
+	
+	var power_up = power_up_scenes[power_up_index].instantiate()
+	power_up.global_position = Vector2(randf_range(50, 500), -50)
+	
+	power_up_container.add_child(power_up)
+	
+	# Debug info (remove in production)
+	difficulty_mutex.lock()
+	var phase = difficulty_data.current_phase
+	var time_elapsed = difficulty_data.time_elapsed
+	difficulty_mutex.unlock()
+	
+	print("Spawned power up type ", power_up_index, " | Phase: ", phase, " | Time: ", int(time_elapsed), "s")
 
 func _on_player_killed():
 	explosion_sound.play()
