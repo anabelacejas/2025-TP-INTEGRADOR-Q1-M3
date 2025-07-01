@@ -18,6 +18,7 @@ extends Node2D
 
 # SOUNDS
 @onready var laser_sound = $SFX/LaserSound
+@onready var heavy_laser_sound = $SFX/HeavyLaserSound
 @onready var enemy_laser_sound = $SFX/EnemyLaserSound
 @onready var hit_sound = $SFX/HitSound
 @onready var explosion_sound = $SFX/ExplodeSound
@@ -63,7 +64,7 @@ var scroll_speed = 100
 var difficulty_phases = [
 	{
 		"time_threshold": 0,
-		"enemy_weights": [0.3, 0.0, 0.0, 0.0, 0.7],
+		"enemy_weights": [1.0, 0.0, 0.0, 0.0, 0.0],
 		"spawn_rate": 1.7,
 		"power_up_spawn_rate": 10, 
 		"scroll_speed": 100,
@@ -310,11 +311,17 @@ func _select_enemy_type() -> int:
 	
 	return _select_type(weights)
 
-func _on_player_laser_shot(lascer_scene, location):
+func _on_player_laser_shot(lascer_scene, location, type):
 	var laser = lascer_scene.instantiate()
 	laser.global_position = location
 	laser_container.add_child(laser)
-	laser_sound.play()
+	match type:
+		"heavy":
+			heavy_laser_sound.play()
+		"normal":
+			laser_sound.play()
+		_:
+			laser_sound.play()
 
 func _on_enemy_laser_shot(laser_scene, location):
 	var laser = laser_scene.instantiate()
