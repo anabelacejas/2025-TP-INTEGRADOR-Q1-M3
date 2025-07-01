@@ -129,4 +129,9 @@ position = Vector2(0, -35)
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 scale = Vector2(1.7, 1.7)
 sprite_frames = SubResource("SpriteFrames_3smsa")
-animation = &"black_default"
+animation = &"red_left"
+
+[node name="InvulnerabilityTimer" type="Timer" parent="."]
+wait_time = 2.0
+
+[connection signal="timeout" from="InvulnerabilityTimer" to="." method="_on_invulnerability_timer_timeout"]

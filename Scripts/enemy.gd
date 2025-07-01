@@ -23,7 +23,7 @@ func take_damage(amount):
 
 func _on_body_entered(body: Node2D):
 	if body is Player:
-		body.die()
+		body.take_damage()
 		die()
 
 func _on_visible_on_screen_notifier_2d_screen_exited():

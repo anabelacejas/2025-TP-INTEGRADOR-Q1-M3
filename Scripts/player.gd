@@ -6,11 +6,13 @@ class_name Player extends CharacterBody2D
 
 @onready var aim = $Aim
 @onready var anim_sprite = $AnimatedSprite2D
+@onready var invuln_timer = $InvulnerabilityTimer
 
 var colour = "black"  # o "red", "black"
 
 signal laser_shot(lascer_scene, location)
 signal killed
+signal damaged
 
 var default_laser_scene = preload("res://Scenes/laser.tscn")
 var heavy_laser_scene = preload("res://Scenes/heavy_laser.tscn")
@@ -20,11 +22,18 @@ var shoot_cd := false
 var heavy_laser_timer: Timer
 var has_heavy_laser = false
 
+var max_lives = 3
+var current_lives := 0:
+	set(value):
+		current_lives = value
+var is_invulnerable := false
+
 func _ready():
 	# ✅ Load elected colour
 	colour = GameData.player_colour  
 	# Initialize with default laser
 	lascer_scene = default_laser_scene
+	current_lives = max_lives
 	
 	# Create timer for heavy laser duration
 	heavy_laser_timer = Timer.new()
@@ -74,7 +83,44 @@ func _on_heavy_laser_timeout():
 
 func die():
 	queue_free()
-	killed.emit()
+
+func take_damage():
+	if is_invulnerable:
+		return
+	current_lives -= 1
+	if(current_lives == 0):
+		die()
+		killed.emit()
+	else:
+		damaged.emit()
+		_start_invulnerability()
 
 func set_colour(c):
 	colour = c
+
+func _start_invulnerability():
+	is_invulnerable = true
+	var tween = create_tween()
+	tween.set_loops()
+	tween.tween_property(self, "modulate:a", 0.3, 0.2)
+	tween.tween_property(self, "modulate:a", 1.0, 0.2)
+	set_meta("invuln_tween", tween)
+	invuln_timer.start()
+
+func _stop_invulnerability():
+	if has_meta("invuln_tween"):
+		var tween = get_meta("invuln_tween")
+		if tween:
+			tween.kill()
+		remove_meta("invuln_tween")
+	modulate.a = 1.0
+
+func get_current_lives() -> int:
+	return current_lives
+
+func get_max_lives() -> int:
+	return max_lives
+
+func _on_invulnerability_timer_timeout() -> void:
+	is_invulnerable = false
+	_stop_invulnerability()

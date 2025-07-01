@@ -16,6 +16,7 @@ extends Node2D
 @onready var game_over: Control = $UILayer/GameOver
 @onready var background: ParallaxBackground = $ParallaxBackground
 
+
 # SOUNDS
 @onready var laser_sound = $SFX/LaserSound
 @onready var enemy_laser_sound = $SFX/EnemyLaserSound
@@ -23,6 +24,7 @@ extends Node2D
 @onready var explosion_sound = $SFX/ExplodeSound
 @onready var lose_sound = $SFX/LoseSound
 @onready var background_music = $BGM/BackgroundMusic
+@onready var damage_sound = $SFX/DamageSound
 
 # THREADING SYSTEM
 var save_thread := Thread.new()
@@ -56,6 +58,10 @@ var score := 0:
 	set(value):
 		score = value
 		hud.score = value
+var lives := 0:
+	set(value):
+		lives = value
+		hud.lives = value
 var game_start_time: float
 var scroll_speed = 100
 
@@ -122,12 +128,15 @@ func _ready():
 	score = 0
 	game_start_time = Time.get_ticks_msec() / 1000.0
 	assert(player!=null)
+	lives = player.get_current_lives()
+	_update_lives_display()
 	
 	# Add player to group so enemies can find it
 	player.add_to_group("player")
 	player.global_position = player_spawn_pos.global_position
 	player.laser_shot.connect(_on_player_laser_shot)
 	player.killed.connect(_on_player_killed)
+	player.damaged.connect(_on_player_damaged)
 	
 	# Start background threads
 	_start_background_threads()
@@ -406,6 +415,8 @@ func _on_power_up_spawn_timer_timeout():
 	print("Spawned power up type ", power_up_index, " | Phase: ", phase, " | Time: ", int(time_elapsed), "s")
 
 func _on_player_killed():
+	lives = 0
+	_update_lives_display()
 	explosion_sound.play()
 	game_over.set_score(score)
 	game_over.set_high_score(high_score)
@@ -421,6 +432,14 @@ func _on_player_killed():
 	lose_sound.play()
 	await get_tree().create_timer(1).timeout
 	game_over.visible = true
+
+func _on_player_damaged():
+	lives -= 1
+	damage_sound.play()
+	_update_lives_display()
+
+func _update_lives_display():
+	hud.update_hearts()
 
 func _exit_tree():
 	"""Cleanup when exiting"""

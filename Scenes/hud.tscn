@@ -1,7 +1,9 @@
-[gd_scene load_steps=5 format=3 uid="uid://b4i47m4g11fug"]
+[gd_scene load_steps=7 format=3 uid="uid://b4i47m4g11fug"]
 
 [ext_resource type="Script" uid="uid://bmwxrj5f2vpxt" path="res://Scripts/hud.gd" id="1_e0onf"]
 [ext_resource type="FontFile" uid="uid://cdr6vltgcjyhj" path="res://Assets/Bonus/ConnectionII.otf" id="2_bjfho"]
+[ext_resource type="Texture2D" uid="uid://cwjwoobs8wjqe" path="res://Assets/PNG/UI/hud_heartFull.png" id="2_t1xeu"]
+[ext_resource type="Texture2D" uid="uid://bhuoxjrg2fvdl" path="res://Assets/PNG/UI/hud_heartEmpty.png" id="3_36asn"]
 [ext_resource type="FontFile" uid="uid://dnnf52x8mkeom" path="res://Assets/Bonus/kenvector_future.ttf" id="3_bjfho"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_3gfia"]
@@ -15,6 +17,8 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_e0onf")
+heart_full = ExtResource("2_t1xeu")
+heart_empty = ExtResource("3_36asn")
 
 [node name="Score" type="Label" parent="."]
 layout_mode = 1
@@ -49,5 +53,19 @@ vertical_alignment = 1
 [node name="PhaseTimer" type="Timer" parent="."]
 wait_time = 3.0
 one_shot = true
+
+[node name="Lives" type="HBoxContainer" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Heart1" type="TextureRect" parent="Lives"]
+layout_mode = 2
+
+[node name="Heart2" type="TextureRect" parent="Lives"]
+layout_mode = 2
+
+[node name="TextureRect3" type="TextureRect" parent="Lives"]
+layout_mode = 2
 
 [connection signal="timeout" from="PhaseTimer" to="." method="_on_phase_timer_timeout"]
