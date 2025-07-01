@@ -1,0 +1,132 @@
+[gd_scene load_steps=10 format=3 uid="uid://cgd270qk8m2j7"]
+
+[ext_resource type="Script" uid="uid://c6xftfosydv0w" path="res://Scripts/menu.gd" id="1_jsrd8"]
+[ext_resource type="Texture2D" uid="uid://xl2cfknfgqwu" path="res://Assets/Backgrounds/darkPurple.png" id="1_xhh6f"]
+[ext_resource type="Texture2D" uid="uid://bhpcksbraitf8" path="res://Assets/Backgrounds/MyStar2.png" id="2_cayip"]
+[ext_resource type="PackedScene" uid="uid://dvssb1a3xo8wa" path="res://Scenes/game.tscn" id="2_wbdvm"]
+[ext_resource type="FontFile" uid="uid://dnnf52x8mkeom" path="res://Assets/Bonus/kenvector_future.ttf" id="3_158mb"]
+[ext_resource type="PackedScene" uid="uid://cp8l4kfwgubhc" path="res://Scenes/player.tscn" id="4_wwsa2"]
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_158mb"]
+particle_flag_disable_z = true
+emission_shape = 3
+emission_box_extents = Vector3(380, 1, 1)
+direction = Vector3(0, -1, 0)
+spread = 0.0
+initial_velocity_min = -1000.0
+initial_velocity_max = -1000.0
+gravity = Vector3(0, 0, 0)
+
+[sub_resource type="LabelSettings" id="LabelSettings_jsrd8"]
+font = ExtResource("3_158mb")
+font_size = 32
+
+[sub_resource type="LabelSettings" id="LabelSettings_wbdvm"]
+font = ExtResource("3_158mb")
+font_size = 42
+
+[node name="Menu" type="Node2D"]
+script = ExtResource("1_jsrd8")
+game_scene = ExtResource("2_wbdvm")
+
+[node name="ParallaxBackground" type="ParallaxBackground" parent="."]
+
+[node name="ParallaxLayer" type="ParallaxLayer" parent="ParallaxBackground"]
+
+[node name="PurpleStars" type="Sprite2D" parent="ParallaxBackground/ParallaxLayer"]
+texture_repeat = 2
+texture = ExtResource("1_xhh6f")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 540, 960)
+
+[node name="StarParticleEffect" type="GPUParticles2D" parent="."]
+position = Vector2(270, -50)
+amount = 20
+texture = ExtResource("2_cayip")
+lifetime = 1.25
+preprocess = 5.0
+process_material = SubResource("ParticleProcessMaterial_158mb")
+
+[node name="Player" parent="." instance=ExtResource("4_wwsa2")]
+position = Vector2(259, 784)
+
+[node name="HighScore" type="Label" parent="."]
+offset_left = 2.0
+offset_top = 209.0
+offset_right = 537.0
+offset_bottom = 284.0
+text = "HIGHEST SCORE
+9999"
+label_settings = SubResource("LabelSettings_jsrd8")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Title" type="Label" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 1.0
+offset_top = 70.0
+offset_right = 539.0
+offset_bottom = 118.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "SPACE SHOOTER"
+label_settings = SubResource("LabelSettings_wbdvm")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PlayButton" type="Button" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 152.0
+offset_top = 420.0
+offset_right = 375.0
+offset_bottom = 473.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("3_158mb")
+theme_override_font_sizes/font_size = 28
+text = "PLAY"
+
+[node name="PlayerColourButton" type="Button" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 152.0
+offset_top = 510.0
+offset_right = 375.0
+offset_bottom = 563.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("3_158mb")
+theme_override_font_sizes/font_size = 28
+text = "COLOUR"
+
+[node name="ExitButton" type="Button" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 152.0
+offset_top = 596.0
+offset_right = 375.0
+offset_bottom = 649.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("3_158mb")
+theme_override_font_sizes/font_size = 28
+text = "EXIT"
+
+[connection signal="pressed" from="PlayButton" to="." method="_on_play_button_pressed"]
+[connection signal="pressed" from="PlayerColourButton" to="." method="_on_player_colour_button_pressed"]
+[connection signal="pressed" from="ExitButton" to="." method="_on_exit_button_pressed"]

@@ -7,6 +7,8 @@ class_name Player extends CharacterBody2D
 @onready var aim = $Aim
 @onready var anim_sprite = $AnimatedSprite2D
 
+var colour = "black"  # o "red", "black"
+
 signal laser_shot(lascer_scene, location)
 signal killed
 
@@ -19,6 +21,8 @@ var heavy_laser_timer: Timer
 var has_heavy_laser = false
 
 func _ready():
+	# ✅ Load elected colour
+	colour = GameData.player_colour  
 	# Initialize with default laser
 	lascer_scene = default_laser_scene
 	
@@ -43,11 +47,11 @@ func _physics_process(_delta):
 	move_and_slide()
 	
 	if direction.x > 0:
-			anim_sprite.play("right")
+		anim_sprite.play(colour + "_right")
 	elif direction.x < 0:
-			anim_sprite.play("left")
+		anim_sprite.play(colour + "_left")
 	else:
-			anim_sprite.play("default")
+		anim_sprite.play(colour + "_default")
 	
 	var margin = Vector2(26,26)
 	global_position = global_position.clamp(margin,get_viewport_rect().size - margin)
@@ -71,3 +75,6 @@ func _on_heavy_laser_timeout():
 func die():
 	queue_free()
 	killed.emit()
+
+func set_colour(c):
+	colour = c

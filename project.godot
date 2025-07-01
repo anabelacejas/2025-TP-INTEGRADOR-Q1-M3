@@ -11,9 +11,13 @@ config_version=5
 [application]
 
 config/name="TP-INTEGRADOR-Q1-M3"
-run/main_scene="res://Scenes/game.tscn"
+run/main_scene="uid://cgd270qk8m2j7"
 config/features=PackedStringArray("4.4", "Forward Plus")
 config/icon="res://icon.svg"
+
+[autoload]
+
+GameData="*res://Shared/game_data.gd"
 
 [display]
 

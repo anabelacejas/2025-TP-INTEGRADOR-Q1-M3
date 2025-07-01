@@ -230,7 +230,7 @@ func _background_processing_thread():
 		OS.delay_msec(50)
 
 func _save_game_thread(score_to_save):
-	var file := FileAccess.open("user://save.data", FileAccess.WRITE)
+	var file := FileAccess.open("res://Saves/save.data", FileAccess.WRITE)
 	if file:
 		file.store_32(score_to_save)
 		file.close()
@@ -238,8 +238,11 @@ func _save_game_thread(score_to_save):
 
 func _process(delta):
 	if Input.is_action_just_pressed("Quit"):
+		if(score > high_score):
+			high_score = score
+			_save_game(high_score)
 		_cleanup_threads()
-		get_tree().quit()
+		get_tree().change_scene_to_file("res://Scenes/menu.tscn")
 	elif Input.is_action_just_pressed("Reset"):
 		_cleanup_threads()
 		get_tree().reload_current_scene()
@@ -412,9 +415,7 @@ func _on_player_killed():
 		game_over.set_high_score(score)
 	
 	# Save in background thread
-	if save_thread.is_started():
-		save_thread.wait_to_finish()
-	save_thread.start(_save_game_thread.bind(high_score))
+	_save_game(high_score)
 	
 	await get_tree().create_timer(0.5).timeout
 	lose_sound.play()
@@ -424,3 +425,10 @@ func _on_player_killed():
 func _exit_tree():
 	"""Cleanup when exiting"""
 	_cleanup_threads()
+
+# Save in background thread
+func _save_game(high_score):
+	if save_thread.is_started():
+		save_thread.wait_to_finish()
+	save_thread.start(_save_game_thread.bind(high_score))
+	print("Saving Game")
