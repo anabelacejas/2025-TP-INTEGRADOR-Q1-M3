@@ -1,0 +1,25 @@
+[gd_scene load_steps=4 format=3 uid="uid://dn4n4ruis28sm"]
+
+[ext_resource type="Script" uid="uid://bl6hu8g053mid" path="res://Scripts/heavy_shoot_power_up.gd" id="1_8jos7"]
+[ext_resource type="Texture2D" uid="uid://ioxu54vg4x0i" path="res://Assets/PNG/Power-ups/HPContainer.png" id="2_8jos7"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_8jos7"]
+size = Vector2(31, 31)
+
+[node name="HeavyShootPowerUp" type="Area2D"]
+script = ExtResource("1_8jos7")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(1, -1)
+scale = Vector2(1.5, 1.5)
+texture = ExtResource("2_8jos7")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0.5, -1.5)
+shape = SubResource("RectangleShape2D_8jos7")
+
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]
+position = Vector2(0.500001, -1.5)
+scale = Vector2(1.55, 1.55)
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]

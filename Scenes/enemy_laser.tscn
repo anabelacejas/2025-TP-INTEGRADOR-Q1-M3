@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3 uid="uid://b4g7msslas2du"]
+
+[ext_resource type="Script" uid="uid://b64snx58rrcoc" path="res://Scripts/enemy_laser.gd" id="1_wss2q"]
+[ext_resource type="Texture2D" uid="uid://dq313rxdgrjn8" path="res://Assets/PNG/Lasers/laserRed01.png" id="2_swast"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_vxa5s"]
+radius = 5.0
+height = 54.0
+
+[node name="enemy_laser" type="Area2D"]
+script = ExtResource("1_wss2q")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+rotation = 3.14159
+texture = ExtResource("2_swast")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CapsuleShape2D_vxa5s")
+
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
