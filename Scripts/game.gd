@@ -19,6 +19,7 @@ extends Node2D
 
 # SOUNDS
 @onready var laser_sound = $SFX/LaserSound
+@onready var heavy_laser_sound = $SFX/HeavyLaserSound
 @onready var enemy_laser_sound = $SFX/EnemyLaserSound
 @onready var hit_sound = $SFX/HitSound
 @onready var explosion_sound = $SFX/ExplodeSound
@@ -41,7 +42,7 @@ var background_mutex := Mutex.new()
 var thread_running = true
 var spawn_data = {
 	"spawn_rate": 1.7,
-	"enemy_weights": [1.0, 0.0, 0.0, 0.0, 0.0],  # Probability weights for each enemy type
+	"enemy_weights": [0.3, 0.0, 0.0, 0.0, 0.7],  # Probability weights for each enemy type
 	"current_difficulty": 0,
 	"power_up_spawn_rate": 10,
 	"power_up_weights": [1.0]
@@ -319,11 +320,17 @@ func _select_enemy_type() -> int:
 	
 	return _select_type(weights)
 
-func _on_player_laser_shot(lascer_scene, location):
+func _on_player_laser_shot(lascer_scene, location, type):
 	var laser = lascer_scene.instantiate()
 	laser.global_position = location
 	laser_container.add_child(laser)
-	laser_sound.play()
+	match type:
+		"heavy":
+			heavy_laser_sound.play()
+		"normal":
+			laser_sound.play()
+		_:
+			laser_sound.play()
 
 func _on_enemy_laser_shot(laser_scene, location):
 	var laser = laser_scene.instantiate()
@@ -374,7 +381,10 @@ func _on_enemy_hit():
 func _on_small_enemies_spawned(enemies_data):
 	for enemy_data in enemies_data:
 		var small_enemy = enemy_data.scene.instantiate()
-		small_enemy.global_position = enemy_data.position
+		
+		# Smart positioning based on movement pattern
+		var spawn_pos = _get_smart_spawn_position(small_enemy, enemy_data.position)
+		small_enemy.global_position = spawn_pos
 		
 		# Apply speed multiplier if specified
 		if "speed_multiplier" in enemy_data:
@@ -392,6 +402,35 @@ func _on_small_enemies_spawned(enemies_data):
 		
 		# Add slight delay between spawns for visual effect
 		await get_tree().create_timer(0.1).timeout
+
+func _get_smart_spawn_position(enemy: Node, original_pos: Vector2) -> Vector2:
+	"""Calculate safe spawn position based on enemy movement pattern"""
+	var screen_width = get_viewport().get_visible_rect().size.x
+	var safe_margin = 50
+	
+	# Check if it's a small enemy with movement patterns
+	if enemy.has_method("_apply_zigzag_movement") or enemy.has_method("_apply_sine_movement"):
+		var movement_pattern = enemy.get("movement_pattern")
+		var amplitude = 0.0
+		
+		match movement_pattern:
+			"zigzag":
+				amplitude = enemy.get("zigzag_amplitude")
+			"sine":
+				amplitude = enemy.get("sine_amplitude")
+		
+		# Calculate safe spawn bounds
+		var min_x = safe_margin + amplitude
+		var max_x = screen_width - safe_margin - amplitude
+		
+		# Adjust X position if needed
+		var adjusted_pos = original_pos
+		adjusted_pos.x = clamp(original_pos.x, min_x, max_x)
+		
+		return adjusted_pos
+	
+	# For regular enemies, use original position
+	return original_pos
 
 func _on_power_up_spawn_timer_timeout():
 	# Select power up type based on current difficulty

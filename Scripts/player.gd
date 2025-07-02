@@ -46,7 +46,10 @@ func _process(delta):
 	if Input.is_action_pressed("shoot"):
 		if(!shoot_cd):
 			shoot_cd = true
-			shoot()
+			if(heavy_laser_timer.time_left > 0):
+				shoot("heavy")
+			else:
+				shoot("normal")
 			await get_tree().create_timer(firing_rate).timeout
 			shoot_cd = false
 
@@ -65,8 +68,8 @@ func _physics_process(_delta):
 	var margin = Vector2(26,26)
 	global_position = global_position.clamp(margin,get_viewport_rect().size - margin)
 
-func shoot():
-	laser_shot.emit(lascer_scene, aim.global_position)
+func shoot(type):
+	laser_shot.emit(lascer_scene, aim.global_position,type)
 
 func activate_heavy_laser():
 	"""Activate heavy laser power-up for a limited time"""
