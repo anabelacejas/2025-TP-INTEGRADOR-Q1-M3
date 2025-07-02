@@ -2,13 +2,13 @@ class_name Player extends CharacterBody2D
 
 @export var speed = 300
 @export var firing_rate = 0.25
-@export var heavy_laser_duration = 5.0  # Duration in seconds for heavy laser power-up
+@export var heavy_laser_duration = 5.0
 
 @onready var aim = $Aim
 @onready var anim_sprite = $AnimatedSprite2D
 @onready var invuln_timer = $InvulnerabilityTimer
 
-var colour = "black"  # o "red", "black"
+var colour = "black"
 
 signal laser_shot(lascer_scene, location)
 signal killed
@@ -29,13 +29,10 @@ var current_lives := 0:
 var is_invulnerable := false
 
 func _ready():
-	# ✅ Load elected colour
 	colour = GameData.player_colour  
-	# Initialize with default laser
 	lascer_scene = default_laser_scene
 	current_lives = max_lives
 	
-	# Create timer for heavy laser duration
 	heavy_laser_timer = Timer.new()
 	heavy_laser_timer.wait_time = heavy_laser_duration
 	heavy_laser_timer.one_shot = true

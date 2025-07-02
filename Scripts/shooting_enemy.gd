@@ -3,11 +3,10 @@ extends Enemy
 @export var firing_rate: float = 1.5
 @export var shoot_range: float = 700
 
-# Shooting components (only used if can_shoot = true)
 @onready var aim = $Aim if has_node("Aim") else null
 @onready var shoot_timer = $ShootTimer if has_node("ShootTimer") else null
 
-signal laser_shot(laser_scene, location)  # NEW
+signal laser_shot(laser_scene, location)
 
 var enemy_laser_scene = preload("res://Scenes/enemy_laser.tscn")
 var can_shoot_now = true
@@ -19,7 +18,6 @@ func _ready():
 
 func _physics_process(delta):
 	super._physics_process(delta)
-	# NEW - Shooting logic
 	_try_shoot_at_player()
 
 func _try_shoot_at_player():
