@@ -17,7 +17,6 @@ func _ready():
 		high_score = 0
 	set_high_score(high_score)
 	
-	# Reinforce plaay button for lost cases
 	$PlayButton.pressed.connect(_on_play_button_pressed, CONNECT_DEFERRED)
 	$PlayButton.disabled = false
 
