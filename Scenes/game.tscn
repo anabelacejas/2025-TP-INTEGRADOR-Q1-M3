@@ -94,7 +94,7 @@ process_material = SubResource("ParticleProcessMaterial_1l0tm")
 position = Vector2(438, 254)
 
 [node name="PlayerSpawnPos" type="Marker2D" parent="."]
-position = Vector2(270, 800)
+position = Vector2(270, 850)
 
 [node name="LaserContainer" type="Node2D" parent="."]
 
