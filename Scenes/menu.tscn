@@ -49,7 +49,7 @@ preprocess = 5.0
 process_material = SubResource("ParticleProcessMaterial_158mb")
 
 [node name="Player" parent="." instance=ExtResource("4_wwsa2")]
-position = Vector2(259, 784)
+position = Vector2(270, 800)
 
 [node name="HighScore" type="Label" parent="."]
 offset_left = 2.0
