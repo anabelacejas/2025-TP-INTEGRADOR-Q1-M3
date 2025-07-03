@@ -29,13 +29,11 @@ func show_phase_message(phase_number: int, message: String = ""):
 	phase_message.text = display_message
 	phase_message.visible = true
 	
-	# Create a fade-in effect
 	var tween = create_tween()
 	phase_message.modulate.a = 0.0
 	tween.tween_property(phase_message, "modulate:a", 1.0, 0.3)
 	
-	# Start timer to hide the message
-	phase_timer.start(3.0)  # Show for 3 seconds
+	phase_timer.start(3.0)
 
 func _on_phase_timer_timeout():
 	"""Hide the phase message with fade-out effect"""
