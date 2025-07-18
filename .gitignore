@@ -4,3 +4,5 @@
 # Ignore contents of Saves folder, but keep the folder itself
 /Saves/*
 !/Saves/.gitkeep
+
+*.tmp

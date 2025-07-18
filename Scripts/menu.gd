@@ -10,7 +10,7 @@ var current_index := 0
 
 
 func _ready():
-	var save_file = FileAccess.open("res://Saves/save.data",FileAccess.READ)
+	var save_file = FileAccess.open("user://Saves/save.data",FileAccess.READ)
 	if save_file != null:
 		high_score = save_file.get_32()
 	else:

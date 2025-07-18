@@ -110,7 +110,7 @@ var difficulty_phases = [
 ]
 
 func _ready():
-	var save_file = FileAccess.open("res://Saves/save.data",FileAccess.READ)
+	var save_file = FileAccess.open("user://Saves/save.data",FileAccess.READ)
 	if save_file != null:
 		high_score = save_file.get_32()
 	else:
@@ -211,7 +211,11 @@ func _background_processing_thread():
 		OS.delay_msec(50)
 
 func _save_game_thread(score_to_save):
-	var file := FileAccess.open("res://Saves/save.data", FileAccess.WRITE)
+	var dir := DirAccess.open("user://")
+	if not dir.dir_exists("Saves"):
+		dir.make_dir("Saves")
+		
+	var file := FileAccess.open("user://Saves/save.data", FileAccess.WRITE)
 	if file:
 		file.store_32(score_to_save)
 		file.close()
